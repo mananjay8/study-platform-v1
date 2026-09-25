@@ -341,15 +341,77 @@ function sendMessage() {
 
     welcome.style.display = "none";
 
+async function sendMessage() {
 
-    setTimeout(function() {
+    const text = input.value.trim();
 
-        addMessage(
-            "✅ आपका message मिल गया। अभी यह test version है। अगली phase में इसे असली AI से connect करेंगे।",
-            "ai"
-        );
+    if (text === "") {
+        return;
+    }
 
-    }, 500);
+    addMessage(text, "user");
+
+    input.value = "";
+
+    welcome.style.display = "none";
+
+
+    const loadingId = "loading-" + Date.now();
+
+    addMessage("⏳ AI सोच रहा है...", "ai");
+
+    const loadingMessage =
+        chat.lastElementChild.querySelector(".message-content");
+
+    loadingMessage.id = loadingId;
+
+
+    try {
+
+        const response = await fetch("/api/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                message: text
+            })
+
+        });
+
+
+        const data = await response.json();
+
+
+        const loadingElement =
+            document.getElementById(loadingId);
+
+
+        if (loadingElement) {
+            loadingElement.textContent =
+                data.answer || ("❌ " + (data.error || "Unknown error"));
+        }
+
+
+    } catch (error) {
+
+        const loadingElement =
+            document.getElementById(loadingId);
+
+
+        if (loadingElement) {
+
+            loadingElement.textContent =
+                "❌ Server से connection नहीं हो पाया।";
+        }
+
+        console.error(error);
+    }
+}
+    
 }
 
 
