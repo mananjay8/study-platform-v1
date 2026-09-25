@@ -1,507 +1,267 @@
-const SUPABASE_URL =
-    "PASTE_YOUR_SUPABASE_URL_HERE";
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-const SUPABASE_KEY =
-    "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
-
-
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-
-// -------------------------
-// HTML ELEMENTS
-// -------------------------
-
-const examList =
-    document.getElementById("exam-list");
-
-const quizSection =
-    document.getElementById("quiz-section");
-
-const resultSection =
-    document.getElementById("result-section");
-
-const questionElement =
-    document.getElementById("question");
-
-const optionsElement =
-    document.getElementById("options");
-
-const feedbackElement =
-    document.getElementById("feedback");
-
-const nextButton =
-    document.getElementById("next-button");
-
-const questionNumberElement =
-    document.getElementById("question-number");
-
-const scoreElement =
-    document.getElementById("score");
-
-const resultElement =
-    document.getElementById("result");
-
-const restartButton =
-    document.getElementById("restart-button");
-
-
-// -------------------------
-// QUIZ VARIABLES
-// -------------------------
-
-let questions = [];
-
-let currentQuestion = 0;
-
-let score = 0;
-
-let answered = false;
-
-let selectedExam = null;
-
-
-// -------------------------
-// LOAD EXAMS
-// -------------------------
-
-async function loadExams() {
-
-    examList.textContent =
-        "Loading exams...";
-
-
-    const { data, error } =
-        await supabaseClient
-            .from("exams")
-            .select("*")
-            .eq("is_active", true)
-            .order("id");
-
-
-    if (error) {
-
-        console.error(error);
-
-        examList.innerHTML =
-            "<p>Exam load नहीं हुआ।</p>";
-
-        return;
-    }
-
-
-    if (!data || data.length === 0) {
-
-        examList.innerHTML =
-            "<p>अभी कोई exam available नहीं है।</p>";
-
-        return;
-    }
-
-
-    examList.innerHTML = "";
-
-
-    data.forEach(function(exam) {
-
-        const button =
-            document.createElement("button");
-
-
-        button.className = "option";
-
-        button.textContent =
-            exam.name;
-
-
-        button.addEventListener(
-            "click",
-            function() {
-
-                startExam(exam);
-
-            }
-        );
-
-
-        examList.appendChild(button);
-
-    });
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f8fa;
+    color: #202124;
+    min-height: 100vh;
 }
 
 
-// -------------------------
-// START EXAM
-// -------------------------
+/* Top bar */
 
-async function startExam(exam) {
+.topbar {
+    height: 60px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
 
-    selectedExam = exam;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
+    padding: 0 20px;
 
-    examList.innerHTML =
-        "<p>Questions loading...</p>";
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
 
+.logo {
+    font-size: 21px;
+    font-weight: bold;
+}
 
-    const { data, error } =
-        await supabaseClient
+.new-chat {
+    border: none;
+    background: #111827;
+    color: white;
 
-            .from("questions")
+    padding: 9px 14px;
+    border-radius: 8px;
 
-            .select(`
-                id,
-                question_text,
-                explanation,
-                negative_marking,
-                options (
-                    id,
-                    option_text,
-                    is_correct
-                )
-            `)
-
-            .eq("exam_id", exam.id)
-
-            .order("id");
-
-
-    if (error) {
-
-        console.error(error);
-
-        examList.innerHTML =
-            "<p>Questions load नहीं हुए।</p>";
-
-        return;
-    }
-
-
-    if (!data || data.length === 0) {
-
-        examList.innerHTML =
-            "<p>इस exam में अभी questions नहीं हैं।</p>";
-
-        return;
-    }
-
-
-    questions = data;
-
-    currentQuestion = 0;
-
-    score = 0;
-
-
-    document.querySelector(".card")
-        .hidden = true;
-
-
-    quizSection.hidden = false;
-
-    resultSection.hidden = true;
-
-
-    showQuestion();
-
+    cursor: pointer;
 }
 
 
-// -------------------------
-// SHOW QUESTION
-// -------------------------
+/* Main */
 
-function showQuestion() {
+.app {
+    width: min(900px, 94%);
+    margin: auto;
 
-    answered = false;
+    min-height: calc(100vh - 60px);
 
-
-    const question =
-        questions[currentQuestion];
-
-
-    questionNumberElement.textContent =
-        "Question " +
-        (currentQuestion + 1) +
-        " / " +
-        questions.length;
-
-
-    scoreElement.textContent =
-        "Score: " + score;
-
-
-    questionElement.textContent =
-        question.question_text;
-
-
-    optionsElement.innerHTML = "";
-
-
-    feedbackElement.innerHTML = "";
-
-    feedbackElement.hidden = true;
-
-
-    nextButton.hidden = true;
-
-
-    question.options.forEach(
-        function(option) {
-
-            const button =
-                document.createElement("button");
-
-
-            button.className =
-                "option";
-
-
-            button.textContent =
-                option.option_text;
-
-
-            button.addEventListener(
-                "click",
-                function() {
-
-                    selectAnswer(
-                        option.id
-                    );
-
-                }
-            );
-
-
-            optionsElement.appendChild(
-                button
-            );
-
-        }
-    );
+    display: flex;
+    flex-direction: column;
 }
 
 
-// -------------------------
-// SELECT ANSWER
-// -------------------------
+/* Welcome */
 
-function selectAnswer(selectedId) {
+.welcome {
+    text-align: center;
 
-    if (answered) {
-        return;
-    }
+    margin-top: 90px;
+    margin-bottom: 40px;
+}
 
+.welcome h1 {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
 
-    answered = true;
-
-
-    const question =
-        questions[currentQuestion];
-
-
-    const selectedOption =
-        question.options.find(
-            function(option) {
-
-                return option.id === selectedId;
-
-            }
-        );
-
-
-    const correctOption =
-        question.options.find(
-            function(option) {
-
-                return option.is_correct === true;
-
-            }
-        );
-
-
-    const buttons =
-        document.querySelectorAll(".option");
-
-
-    buttons.forEach(
-        function(button, index) {
-
-            const option =
-                question.options[index];
-
-
-            button.disabled = true;
-
-
-            if (option.is_correct) {
-
-                button.classList.add(
-                    "correct"
-                );
-
-            }
-
-        }
-    );
-
-
-    if (
-        selectedOption &&
-        selectedOption.is_correct
-    ) {
-
-        score++;
-
-        feedbackElement.innerHTML =
-            "<strong>✓ Correct!</strong><br><br>" +
-
-            "<strong>Explanation:</strong><br>" +
-
-            (
-                question.explanation ||
-                "इस प्रश्न की explanation उपलब्ध नहीं है।"
-            );
-
-    } else {
-
-        const selectedButton =
-            Array.from(buttons).find(
-                function(button, index) {
-
-                    return question.options[index].id
-                        === selectedId;
-
-                }
-            );
-
-
-        if (selectedButton) {
-
-            selectedButton.classList.add(
-                "wrong"
-            );
-
-        }
-
-
-        feedbackElement.innerHTML =
-            "<strong>✗ Wrong!</strong><br><br>" +
-
-            "<strong>Correct Answer:</strong> " +
-
-            (
-                correctOption
-                    ? correctOption.option_text
-                    : "Not available"
-            ) +
-
-            "<br><br>" +
-
-            "<strong>Explanation:</strong><br>" +
-
-            (
-                question.explanation ||
-                "Explanation उपलब्ध नहीं है।"
-            );
-
-    }
-
-
-    scoreElement.textContent =
-        "Score: " + score;
-
-
-    feedbackElement.hidden = false;
-
-    nextButton.hidden = false;
-
+.welcome p {
+    color: #6b7280;
+    line-height: 1.6;
 }
 
 
-// -------------------------
-// NEXT QUESTION
-// -------------------------
+/* Chat */
 
-nextButton.addEventListener(
-    "click",
-    function() {
+.chat {
+    width: 100%;
+    padding-bottom: 20px;
+}
 
-        currentQuestion++;
+.message {
+    display: flex;
+    margin: 15px 0;
+}
 
+.message.user {
+    justify-content: flex-end;
+}
 
-        if (
-            currentQuestion <
-            questions.length
-        ) {
+.message.ai {
+    justify-content: flex-start;
+}
 
-            showQuestion();
+.message-content {
+    max-width: 75%;
+    padding: 13px 16px;
 
-        } else {
+    border-radius: 14px;
 
-            showResult();
+    line-height: 1.5;
+}
 
-        }
+.user .message-content {
+    background: #111827;
+    color: white;
+}
 
-    }
-);
-
-
-// -------------------------
-// RESULT
-// -------------------------
-
-function showResult() {
-
-    quizSection.hidden = true;
-
-    resultSection.hidden = false;
-
-
-    const total =
-        questions.length;
-
-
-    const percentage =
-        Math.round(
-            (score / total) * 100
-        );
-
-
-    resultElement.innerHTML =
-
-        "<h3>Score: " +
-        score +
-        " / " +
-        total +
-        "</h3>" +
-
-        "<p>Accuracy: " +
-        percentage +
-        "%</p>";
-
+.ai .message-content {
+    background: white;
+    border: 1px solid #e5e7eb;
 }
 
 
-// -------------------------
-// BACK TO EXAMS
-// -------------------------
+/* Quick buttons */
 
-restartButton.addEventListener(
-    "click",
-    function() {
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 
-        location.reload();
+    margin-bottom: 15px;
+}
 
+.quick-actions button {
+    border: 1px solid #dfe3e8;
+    background: white;
+
+    padding: 9px 13px;
+
+    border-radius: 20px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+}
+
+.quick-actions button:hover {
+    background: #f0f2f5;
+}
+
+
+/* Input */
+
+.input-area {
+    position: sticky;
+    bottom: 0;
+
+    background: #f7f8fa;
+
+    padding-bottom: 15px;
+}
+
+.input-box {
+    background: white;
+
+    border: 1px solid #d5d9df;
+    border-radius: 16px;
+
+    min-height: 58px;
+
+    display: flex;
+    align-items: flex-end;
+
+    padding: 8px;
+}
+
+textarea {
+    flex: 1;
+
+    border: none;
+    outline: none;
+
+    resize: none;
+
+    font-family: inherit;
+    font-size: 16px;
+
+    padding: 9px;
+
+    min-height: 40px;
+}
+
+.upload-btn,
+.send-btn {
+    width: 40px;
+    height: 40px;
+
+    border: none;
+    background: transparent;
+
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    font-size: 19px;
+}
+
+.send-btn {
+    background: #111827;
+    color: white;
+}
+
+.upload-btn:hover {
+    background: #f0f2f5;
+}
+
+
+/* File */
+
+.file-info {
+    font-size: 13px;
+    margin-top: 6px;
+    color: #555;
+}
+
+
+/* Small text */
+
+.small-text {
+    text-align: center;
+
+    color: #888;
+
+    font-size: 11px;
+
+    margin-top: 7px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .topbar {
+        padding: 0 12px;
     }
-);
 
+    .welcome {
+        margin-top: 60px;
+    }
 
-// -------------------------
-// START
-// -------------------------
+    .welcome h1 {
+        font-size: 28px;
+    }
 
-loadExams();1
+    .message-content {
+        max-width: 88%;
+    }
+
+    .quick-actions {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+    }
+
+    .quick-actions button {
+        white-space: nowrap;
+    }
