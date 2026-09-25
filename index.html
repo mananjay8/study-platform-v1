@@ -1,100 +1,120 @@
 <!DOCTYPE html>
-<html lang="hi">
-
+<html lang="en">
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Study Platform</title>
+    <title>Study AI</title>
 
     <link rel="stylesheet" href="style.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
 
 <body>
 
-<header class="header">
+    <header class="topbar">
+        <div class="logo">Study AI</div>
 
-    <h1>Study Platform</h1>
-
-    <p>Learn • Practice • Improve</p>
-
-</header>
-
-
-<main class="container">
-
-    <section class="card">
-
-        <h2>Choose Exam</h2>
-
-        <div id="exam-list">
-            Loading exams...
-        </div>
-
-    </section>
-
-
-    <section id="quiz-section"
-             class="card"
-             hidden>
-
-        <div class="quiz-top">
-
-            <span id="question-number"></span>
-
-            <span id="score">
-                Score: 0
-            </span>
-
-        </div>
-
-
-        <h2 id="question"></h2>
-
-        <div id="options"></div>
-
-        <div id="feedback"
-             class="feedback">
-        </div>
-
-
-        <button id="next-button"
-                class="next-button"
-                hidden>
-            Next Question
+        <button class="new-chat" onclick="newChat()">
+            + New Chat
         </button>
-
-    </section>
-
-
-    <section id="result-section"
-             class="card"
-             hidden>
-
-        <h2>Quiz Complete 🎉</h2>
-
-        <div id="result"></div>
-
-        <button id="restart-button"
-                class="next-button">
-
-            Back to Exams
-
-        </button>
-
-    </section>
-
-</main>
+    </header>
 
 
-<script src="script.js"></script>
+    <main class="app">
+
+        <!-- Welcome -->
+        <section id="welcome" class="welcome">
+
+            <h1>What do you want to study?</h1>
+
+            <p>
+                Ask a question, upload study material,
+                or tell Study AI what you want to learn.
+            </p>
+
+        </section>
+
+
+        <!-- Chat -->
+        <section id="chat" class="chat"></section>
+
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+
+            <button onclick="setPrompt('Create a quiz from this topic')">
+                📝 Quiz
+            </button>
+
+            <button onclick="setPrompt('Explain this topic in simple language')">
+                💡 Explain
+            </button>
+
+            <button onclick="setPrompt('Make short and useful notes')">
+                📚 Notes
+            </button>
+
+            <button onclick="setPrompt('Create important practice questions')">
+                ❓ Questions
+            </button>
+
+            <button onclick="setPrompt('Create flashcards for this topic')">
+                🧠 Flashcards
+            </button>
+
+            <button onclick="setPrompt('Research this topic and give me a verified answer')">
+                🔎 Research
+            </button>
+
+        </div>
+
+
+        <!-- Input -->
+        <div class="input-area">
+
+            <div class="input-box">
+
+                <button
+                    class="upload-btn"
+                    onclick="document.getElementById('fileInput').click()">
+                    📎
+                </button>
+
+                <input
+                    type="file"
+                    id="fileInput"
+                    hidden
+                    accept=".pdf,.jpg,.jpeg,.png,.txt"
+                    onchange="fileSelected(event)"
+                >
+
+                <textarea
+                    id="userInput"
+                    placeholder="Ask anything about your studies..."
+                    rows="1"
+                    onkeydown="handleKey(event)"
+                ></textarea>
+
+                <button
+                    class="send-btn"
+                    onclick="sendMessage()">
+                    ➤
+                </button>
+
+            </div>
+
+            <div id="fileInfo" class="file-info"></div>
+
+            <p class="small-text">
+                Study AI can work with your questions and study material.
+            </p>
+
+        </div>
+
+    </main>
+
+
+    <script src="script.js"></script>
 
 </body>
-
 </html>
