@@ -1,138 +1,125 @@
-* {
-    box-sizing: border-box;
-}
+const input = document.getElementById("userInput");
+const chat = document.getElementById("chat");
+const welcome = document.getElementById("welcome");
+const fileInfo = document.getElementById("fileInfo");
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f2f4f7;
-    color: #222;
-}
 
-.header {
-    background: white;
-    text-align: center;
-    padding: 25px 15px;
-    border-bottom: 1px solid #ddd;
-}
+// Send message
 
-.header h1 {
-    margin: 0 0 8px;
-}
+function sendMessage() {
 
-.header p {
-    margin: 0;
-    color: #666;
-}
+    const text = input.value.trim();
 
-.container {
-    width: 100%;
-    max-width: 700px;
-    margin: 25px auto;
-    padding: 0 15px;
-}
-
-.card {
-    background: white;
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0,0,0,.08);
-    margin-bottom: 20px;
-}
-
-.card h2 {
-    margin-top: 0;
-}
-
-.option {
-    width: 100%;
-    padding: 15px;
-    margin-top: 12px;
-
-    border: 2px solid #ddd;
-    border-radius: 10px;
-
-    background: white;
-    color: #222;
-
-    text-align: left;
-    font-size: 16px;
-
-    cursor: pointer;
-}
-
-.option:hover {
-    background: #f5f5f5;
-}
-
-.option:disabled {
-    cursor: default;
-}
-
-.option.correct {
-    background: #d9f7df;
-    border-color: #28a745;
-}
-
-.option.wrong {
-    background: #ffdede;
-    border-color: #dc3545;
-}
-
-.feedback {
-    margin-top: 20px;
-    padding: 15px;
-
-    border-radius: 10px;
-
-    background: #f1f3f5;
-
-    line-height: 1.6;
-}
-
-.quiz-top {
-    display: flex;
-    justify-content: space-between;
-
-    margin-bottom: 20px;
-
-    color: #666;
-    font-size: 14px;
-}
-
-.next-button {
-    width: 100%;
-
-    margin-top: 20px;
-    padding: 14px;
-
-    border: none;
-    border-radius: 10px;
-
-    background: #222;
-    color: white;
-
-    font-size: 16px;
-
-    cursor: pointer;
-}
-
-.next-button:hover {
-    background: #444;
-}
-
-@media (max-width: 600px) {
-
-    .card {
-        padding: 18px;
+    if (text === "") {
+        return;
     }
 
-    .header h1 {
-        font-size: 24px;
+    addMessage(text, "user");
+
+    input.value = "";
+
+    welcome.style.display = "none";
+
+    // Temporary AI response
+    setTimeout(() => {
+
+        addMessage(
+            "मैंने आपका request समझ लिया। अभी AI connection नहीं जोड़ा गया है। अगली phase में इसे real AI से connect करेंगे।",
+            "ai"
+        );
+
+    }, 600);
+}
+
+
+// Add message
+
+function addMessage(text, type) {
+
+    const message = document.createElement("div");
+
+    message.className = "message " + type;
+
+    const content = document.createElement("div");
+
+    content.className = "message-content";
+
+    content.textContent = text;
+
+    message.appendChild(content);
+
+    chat.appendChild(message);
+
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+    });
+}
+
+
+// Quick action
+
+function setPrompt(text) {
+
+    input.value = text;
+
+    input.focus();
+}
+
+
+// Enter key
+
+function handleKey(event) {
+
+    if (event.key === "Enter" && !event.shiftKey) {
+
+        event.preventDefault();
+
+        sendMessage();
+    }
+}
+
+
+// File selected
+
+function fileSelected(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) {
+        return;
     }
 
-    #question {
-        font-size: 19px;
-    }
+    fileInfo.textContent =
+        "📎 Selected: " + file.name;
 
+    welcome.style.display = "none";
+
+    addMessage(
+        "मैंने आपकी file select कर ली: " + file.name,
+        "user"
+    );
+
+    setTimeout(() => {
+
+        addMessage(
+            "File upload system अगली phase में Supabase Storage से connect होगा। अभी केवल file selection test हो रहा है।",
+            "ai"
+        );
+
+    }, 600);
+}
+
+
+// New chat
+
+function newChat() {
+
+    chat.innerHTML = "";
+
+    welcome.style.display = "block";
+
+    input.value = "";
+
+    fileInfo.textContent = "";
 }
